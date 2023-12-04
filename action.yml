@@ -1,0 +1,11 @@
+name: 'Link checker'
+description: 'Link checker action'
+inputs:
+  dir:
+    description: 'course dir'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.dir}}
