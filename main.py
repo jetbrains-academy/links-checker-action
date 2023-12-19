@@ -52,7 +52,8 @@ def check_link(task_folder, link):
             else:
                 return True, ""
         elif link.startswith(('http://', 'https://')):
-            response = requests.head(link)
+            headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+            response = requests.head(link, headers=headers)
             if 400 <= response.status_code <= 599:
                 return False, f"NOT valid url (returns {response.status_code}): {link}"
             else:
