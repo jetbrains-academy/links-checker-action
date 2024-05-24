@@ -5,6 +5,7 @@ import sys
 import requests
 from markdown import markdown
 
+from urllib.parse import urlparse
 
 def read_file(filename):
     try:
@@ -54,6 +55,8 @@ def check_link(task_folder, link):
         elif link.startswith(('http://', 'https://')):
             headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
             response = requests.head(link, headers=headers)
+            if response.status_code == 403 and urlparse(link).netloc == "hi.hyperskill.org":
+                return True, f"[WARN]: In automatics tests hi.hyperskill.org can return 403 error code. Now this happend to: {link}"
             if 400 <= response.status_code <= 599:
                 return False, f"NOT valid url (returns {response.status_code}): {link}"
             else:
