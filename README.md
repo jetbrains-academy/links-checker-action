@@ -3,7 +3,7 @@ Action for correctness check of links in courses
 
 ## Usage example
 Add this action to the course repository:
-```
+```yaml
 name: LinksChecker
 
 on:
