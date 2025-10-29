@@ -102,7 +102,7 @@ def check_link(task_folder, link, exceptions):
             if is_exception:
                 return ValidationLevel.WARNING, f"[WARN]: Code {response.status_code}: {exception_message}: {link}"
             if 400 <= response.status_code <= 599:
-                return ValidationLevel.ERROR, f"NOT valid url (returns {response.status_code}): {link}"
+                return ValidationLevel.ERROR, f"NOT valid url (returns {response.status_code})"
             else:
                 return ValidationLevel.SUCCESS, None
         elif link.startswith(('file://', 'psi_element://', 'tool_window://', 'settings://')):
@@ -149,7 +149,7 @@ if __name__ == '__main__':
             print(f"\t LINK: {link}")
             level, message = check_link(task_folder, link, exceptions)
             if level == ValidationLevel.ERROR:
-                errors_log += f"Error in file: {file}\n\t{message}\n"
+                errors_log += f"Error in file: {file}\n\tLink: {link}\n\t{message}\n"
             elif level == ValidationLevel.WARNING:
                 warnings_log += f"Warning in file: {file}\n\t{message}\n"
             # SUCCESS level - no action needed
