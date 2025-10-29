@@ -130,7 +130,7 @@ if __name__ == '__main__':
     print(f"Running for directory {course_directory} (absolute path: {os.path.abspath(course_directory)})")
 
     # Load exceptions
-    exceptions = load_exceptions('exceptions.yaml')
+    exceptions = load_exceptions('/LinksChecker/exceptions.yaml')
     print(f"Loaded {len(exceptions)} exception rule(s)")
 
     task_files = find_files(course_directory, task_description_name)
