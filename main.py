@@ -1,11 +1,19 @@
 import os
 import re
 import sys
+from enum import Enum
 
 import requests
+import yaml
 from markdown import markdown
 
 from urllib.parse import urlparse
+
+class ValidationLevel(Enum):
+    """Enum for validation result levels"""
+    SUCCESS = "success"
+    WARNING = "warning"
+    ERROR = "error"
 
 def read_file(filename):
     try:
@@ -16,6 +24,35 @@ def read_file(filename):
         print(f"File '{filename}' not found.")
         return None
 
+def load_exceptions(exceptions_file='exceptions.yaml'):
+    """Load exceptions from YAML file"""
+    try:
+        with open(exceptions_file, 'r') as file:
+            data = yaml.safe_load(file)
+            return data.get('exceptions', [])
+    except FileNotFoundError:
+        print(f"[INFO]: No exceptions file found at '{exceptions_file}', proceeding without exceptions")
+        return []
+    except yaml.YAMLError as e:
+        print(f"[WARN]: Error parsing exceptions file: {e}")
+        return []
+
+
+def check_exception(url, status_code, exceptions):
+    """Check if a URL with given status code matches any exception rule"""
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+
+    for exception in exceptions:
+        exception_domain = exception.get('domain', '')
+        exception_codes = exception.get('status_codes', [])
+        exception_message = exception.get('message', f"Exception rule for {exception_domain}")
+
+        # Check if domain matches and status code is in the exception list
+        if exception_domain in domain and status_code in exception_codes:
+            return True, exception_message
+
+    return False, None
 
 def extract_links_from_markdown(markdown_text):
     if markdown_text is None:
@@ -42,7 +79,7 @@ def find_files(directory, filename):
     return files_list
 
 
-def check_link(task_folder, link):
+def check_link(task_folder, link, exceptions):
     try:
 
         if link.startswith('course://'):
@@ -61,22 +98,23 @@ def check_link(task_folder, link):
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
             }
             response = requests.head(link, headers=headers)
-            if response.status_code == 403 and urlparse(link).netloc == "hi.hyperskill.org":
-                return True, f"[WARN]: In automatics tests hi.hyperskill.org can return 403 error code. Now this happend to: {link}"
+            is_exception, exception_message = check_exception(link, response.status_code, exceptions)
+            if is_exception:
+                return ValidationLevel.WARNING, f"[WARN]: Code {response.status_code}: {exception_message}: {link}"
             if 400 <= response.status_code <= 599:
-                return False, f"NOT valid url (returns {response.status_code}): {link}"
+                return ValidationLevel.ERROR, f"NOT valid url (returns {response.status_code}): {link}"
             else:
-                return True, ""
+                return ValidationLevel.SUCCESS, None
         elif link.startswith(('file://', 'psi_element://', 'tool_window://', 'settings://')):
-            return True, ""  # Not supported for now
+            return ValidationLevel.SUCCESS, None  # Not supported for now
         else:  # Assumes that it's a relative path
             path = f"{task_folder}/{link}"
             if not (os.path.isfile(path) or os.path.isdir(path)):
-                return False, f"NO such file: {path}"
-            return True, ""
+                return ValidationLevel.ERROR, f"NO such file: {path}"
+            return ValidationLevel.SUCCESS, None
 
     except Exception as e:
-        return False, str(e)
+        return ValidationLevel.ERROR, str(e)
 
 
 if __name__ == '__main__':
@@ -91,10 +129,15 @@ if __name__ == '__main__':
     print("\n===== Common info =====")
     print(f"Running for directory {course_directory} (absolute path: {os.path.abspath(course_directory)})")
 
+    # Load exceptions
+    exceptions = load_exceptions('exceptions.yaml')
+    print(f"Loaded {len(exceptions)} exception rule(s)")
+
     task_files = find_files(course_directory, task_description_name)
 
     print(f"\n===== The following links were found =====")
     errors_log = ""
+    warnings_log = ""
 
     for file in task_files:
         print(f"FILE: {file}")
@@ -104,9 +147,18 @@ if __name__ == '__main__':
 
         for link in links:
             print(f"\t LINK: {link}")
-            result, log = check_link(task_folder, link)
-            if not result:
-                errors_log += f"Error in file: {file}\n\t{log}\n"
+            level, message = check_link(task_folder, link, exceptions)
+            if level == ValidationLevel.ERROR:
+                errors_log += f"Error in file: {file}\n\t{message}\n"
+            elif level == ValidationLevel.WARNING:
+                warnings_log += f"Warning in file: {file}\n\t{message}\n"
+            # SUCCESS level - no action needed
+
+    print("\n===== WARNINGS LOG =====")
+    if len(warnings_log) > 0:
+        print(warnings_log)
+    else:
+        print("No warnings found")
 
     print("\n===== ERRORS LOG =====")
     if len(errors_log) > 0:

@@ -1,0 +1,19 @@
+# Exception rules for websites with bot protection
+# Each exception can specify:
+#   - domain: The domain to match (can be exact or partial match)
+#   - status_codes: List of HTTP status codes to treat as acceptable
+#   - message: Optional custom message to display
+
+exceptions:
+  - domain: "npmjs.com"
+    status_codes: [403]
+    message: "npmjs.com has bot protection"
+  
+  - domain: "hi.hyperskill.org"
+    status_codes: [403]
+    message: "hi.hyperskill.org can return 403 in automated tests"
+
+# You can add more exceptions as needed:
+#  - domain: "example.com"
+#    status_codes: [403, 503]
+#    message: "Custom message here"
