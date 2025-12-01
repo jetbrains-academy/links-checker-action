@@ -13,6 +13,14 @@ exceptions:
     status_codes: [403]
     message: "hi.hyperskill.org can return 403 in automated tests"
 
+  - domain: "machinelearningmastery.com"
+    status_codes: [ 403 ]
+    message: "machinelearningmastery.com can return 403 in automated tests"
+
+  - domain: "www.kaggle.com"
+    status_codes: [ 404 ]
+    message: "www.kaggle.com has bot protection"
+
 # You can add more exceptions as needed:
 #  - domain: "example.com"
 #    status_codes: [403, 503]
