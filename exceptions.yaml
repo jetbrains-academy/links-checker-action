@@ -21,6 +21,12 @@ exceptions:
     status_codes: [ 404 ]
     message: "www.kaggle.com has bot protection"
 
+  - domain: "www.poly.pizza"
+    status_codes: [ 403 ]
+    message: "www.poly.pizza can return 403 in automated tests"
+
+
+
 # You can add more exceptions as needed:
 #  - domain: "example.com"
 #    status_codes: [403, 503]
