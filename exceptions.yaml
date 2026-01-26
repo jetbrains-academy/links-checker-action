@@ -21,9 +21,9 @@ exceptions:
     status_codes: [ 404 ]
     message: "www.kaggle.com has bot protection"
 
-  - domain: "www.poly.pizza"
+  - domain: "poly.pizza"
     status_codes: [ 403 ]
-    message: "www.poly.pizza can return 403 in automated tests"
+    message: "poly.pizza can return 403 in automated tests"
 
 
 
