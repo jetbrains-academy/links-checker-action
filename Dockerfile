@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 LABEL authors="Konstantin.Chaika"
 
 COPY requirements.txt LinksChecker/requirements.txt
