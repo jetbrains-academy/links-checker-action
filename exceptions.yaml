@@ -25,7 +25,9 @@ exceptions:
     status_codes: [ 403 ]
     message: "poly.pizza can return 403 in automated tests"
 
-
+  - domain: "realpython.com"
+    status_codes: [ 403 ]
+    message: "realpython.com can return 403 in automated tests"  
 
 # You can add more exceptions as needed:
 #  - domain: "example.com"
